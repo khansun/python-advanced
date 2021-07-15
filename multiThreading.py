@@ -1,22 +1,29 @@
 from concurrent.futures import ThreadPoolExecutor, wait
+import requests
+import pandas as pd
+from tqdm import tqdm
 
-def scrape_page(url):
-    # ... scraping logic
+def punctuate(text, index):
+    res = requests.post('http://127.0.0.1:5000/v1/punctuation/bn', json={"rawText":text})
+    if res.ok:
+        output = res.json()
+        with open ("texts_punc/"+str(index)+".txt", "w", encoding="utf8") as f:
+            f.write((output["punctText"]))
 
-    # remove the following line when you have written the logic
-    raise NotImplementedError
-
-def batch_scrape(urls):
+def batch_punctuate(texts):
     tasks = []
 
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        for url in urls:
-            # for executor.submit, the first argument will be the name of the function to execute. All the argument after that will be passed as the executing function's argument
-            tasks.append(executor.submit(scrape_page, url))
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        for i in tqdm(range(len(texts))):
+            tasks.append(executor.submit(punctuate, texts[i], i))
 
     wait(tasks)
 
 
 if __name__ == "__main__":
-    urls = ['https://google.com', 'htpps://facebook.com']
-    batch_scrape(urls)
+    df = pd.read_excel("data/good_quality_fixed.xlsx")
+    puncTexts = list()
+    for i in tqdm(range(0, 5)):
+        puncTexts.append(df.Text[i]+"\n")
+    batch_punctuate(puncTexts)
+    print("DONE")
