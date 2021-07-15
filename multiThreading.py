@@ -7,7 +7,7 @@ def punctuate(text, index):
     res = requests.post('http://127.0.0.1:5000/v1/punctuation/bn', json={"rawText":text})
     if res.ok:
         output = res.json()
-        with open ("texts_punc/"+str(index)+".txt", "w", encoding="utf8") as f:
+        with open ("data/texts_punc/"+str(index)+".txt", "w", encoding="utf8") as f:
             f.write((output["punctText"]))
 
 def batch_punctuate(texts):
@@ -21,9 +21,9 @@ def batch_punctuate(texts):
 
 
 if __name__ == "__main__":
-    df = pd.read_excel("data/good_quality_fixed.xlsx")
+    df = pd.read_excel("data/bn_bd.xlsx")
     puncTexts = list()
-    for i in tqdm(range(0, 5)):
+    for i in tqdm(range(0, 2)):
         puncTexts.append(df.Text[i]+"\n")
     batch_punctuate(puncTexts)
     print("DONE")
